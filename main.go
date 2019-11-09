@@ -1,6 +1,7 @@
-package main
+/*package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -9,6 +10,8 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
 )
 
 var (
@@ -41,12 +44,12 @@ var ratios = promauto.NewGauge(prometheus.GaugeOpts{
 })
 
 var ratio = 0
-
-/*
-ports : 1998 -> port d'écoute du reverse proxy pour la destination serveur
-1999: port d'écoute pour la source client
 */
-func main() {
+/*
+ports : 1998 -> port d'écoute du reverse proxy pour la destination host
+1999: port d'écoute pour la source client
+*/ /*
+func amain() {
 	ratios.Set(0.0)
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/report", func(writer http.ResponseWriter, request *http.Request) {
@@ -74,11 +77,12 @@ func main() {
 		fmt.Fprint(writer, "merci")
 	})
 	go http.ListenAndServe(":2112", nil)
-	println("listening")
+
 	client, _ := net.Listen("tcp", ":1999")
-	serveur, _ := net.Listen("tcp", ":1998") //serveur
+	host, _ := net.Listen("tcp", ":1998") //host
+	println("listening")
 	for {
-		serveurConn, _ := serveur.Accept()
+		serveurConn, _ := host.Accept()
 		connectedServers.Inc()
 		fmt.Println("server connected " + serveurConn.RemoteAddr().String())
 
@@ -112,5 +116,6 @@ func main() {
 		}
 		println("fin boucle")
 	}
-
 }
+*/
+package main
