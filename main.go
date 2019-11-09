@@ -89,8 +89,24 @@ func main() {
 		if werr == nil {
 			//démarrage de la fonction de proxy
 			fmt.Println("starting proxy for client " + clientConn.RemoteAddr().String())
-			go io.Copy(serveurConn, clientConn)
-			go io.Copy(clientConn, serveurConn)
+			go func() {
+				_, err := io.Copy(serveurConn, clientConn)
+				if err != nil {
+					fmt.Println(err)
+					println("fermeture des connexions")
+					serveurConn.Close()
+					clientConn.Close()
+				}
+			}()
+			go func() {
+				_, err := io.Copy(clientConn, serveurConn)
+				if err != nil {
+					fmt.Println(err)
+					println("fermeture des connexions")
+					serveurConn.Close()
+					clientConn.Close()
+				}
+			}()
 		} else {
 			fmt.Println(werr)
 		}
