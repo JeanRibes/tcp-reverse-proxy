@@ -24,10 +24,16 @@ var (
 	})
 )
 var (
-	scrapedWebsites = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "security_crawler_scraped_websites",
+	scrapedWebsitesTotal = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "security_crawler_scraped_websites_total",
 		Help: "Total number of websites scraped by server",
 	})
+)
+var scrapedWebsites = promauto.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "security_crawler_scraped_websites",
+		Help: "Number of scrapes by website",
+	}, []string{"website", "ratio"},
 )
 var ratios = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "security_crawler_scraped_http_https_ratio",
@@ -45,22 +51,26 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/report", func(writer http.ResponseWriter, request *http.Request) {
 		println("report strating")
-		scrapedWebsites.Inc()
+		scrapedWebsitesTotal.Inc()
 		key, ok := request.URL.Query()["ratio"]
+		lien, lok := request.URL.Query()["website"]
 		if ok {
-			for _, r := range key {
-				fmt.Println("key:" + r)
-				ra, _ := strconv.Atoi(r)
-				if ratio == 0 {
-					ratio = ra
-				} else {
-					ratio = (ratio + ra) / 2
-				}
-				ratios.Set(float64(ratio))
+			fmt.Println("key:" + key[0])
+			ra, _ := strconv.Atoi(key[0])
+			if ratio == 0 {
+				ratio = ra
+			} else {
+				ratio = (ratio + ra) / 2
+			}
+			ratios.Set(float64(ratio))
+			if lok {
+				println(lien[0])
+				scrapedWebsites.WithLabelValues(lien[0], key[0]).Inc()
 			}
 		} else {
 			println("non ok " + strconv.Itoa(len(key)))
 		}
+
 		fmt.Fprint(writer, "merci")
 	})
 	go http.ListenAndServe(":2112", nil)
