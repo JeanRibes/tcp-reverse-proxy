@@ -31,12 +31,7 @@ FROM busybox
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /go/src/github.com/jeanribes/tcp-reverse-proxy/main .
 
-# for server to connect
-EXPOSE 1998
-# for client to connect
-EXPOSE 1999
-# for Prometheus metrics
+EXPOSE 2323
 EXPOSE 2112
 
-# Command to run the executable
 CMD ["/main"]
